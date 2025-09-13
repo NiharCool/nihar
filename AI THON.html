@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Student Finance Manager</title>
+<style>
+  body{font-family:Arial, sans-serif;background:#f3f4f6;margin:0;padding:0;}
+  header{background:#2563eb;color:#fff;padding:15px;text-align:center;}
+  h1{margin:0;}
+  main{display:grid;grid-template-columns:1fr 1fr;gap:20px;padding:20px;}
+  .card{background:#fff;padding:15px;border-radius:10px;box-shadow:0 2px 6px rgba(0,0,0,0.1);}
+  h3{margin-top:0;color:#2563eb;}
+  input,button{padding:8px;margin:5px 0;border-radius:6px;border:1px solid #ccc;width:100%;}
+  button{background:#2563eb;color:white;border:none;cursor:pointer;}
+  button:hover{background:#1e40af;}
+  .expense{display:flex;justify-content:space-between;border-bottom:1px solid #eee;padding:5px 0;}
+  .alert{background:#fee2e2;color:#991b1b;padding:8px;border-radius:6px;margin:5px 0;}
+  footer{text-align:center;padding:10px;background:#e5e7eb;color:#374151;}
+</style>
+</head>
+<body>
+
+<header>
+  <h1>💸 Intelligent Student Finance Manager</h1>
+  <p>Budgeting • Tracking • Goals</p>
+</header>
+
+<main>
+  <!-- Left Column -->
+  <div>
+    <div class="card">
+      <h3>Add Expense</h3>
+      <input id="desc" placeholder="Description (e.g., Food, Book)">
+      <input id="amt" type="number" placeholder="Amount (₹)">
+      <button onclick="addExpense()">Add Expense</button>
+    </div>
+
+    <div class="card">
+      <h3>Expenses</h3>
+      <div id="list"></div>
+      <p><b>Total:</b> ₹<span id="total">0</span></p>
+    </div>
+
+    <div id="alerts"></div>
+  </div>
+
+  <!-- Right Column -->
+  <div>
+    <div class="card">
+      <h3>Monthly Budget</h3>
+      <input id="budget" type="number" placeholder="Enter Monthly Budget">
+      <button onclick="setBudget()">Save Budget</button>
+      <p id="budgetInfo"></p>
+    </div>
+
+    <div class="card">
+      <h3>Savings Goal</h3>
+      <input id="goalName" placeholder="Goal name (e.g., Laptop)">
+      <input id="goalAmt" type="number" placeholder="Target Amount (₹)">
+      <button onclick="setGoal()">Save Goal</button>
+      <p id="goalInfo"></p>
+      <div style="background:#e5e7eb;height:10px;border-radius:6px;">
+        <div id="goalBar" style="height:10px;width:0;background:#34d399;border-radius:6px;"></div>
+      </div>
+    </div>
+  </div>
+</main>
+
+<footer>
+  © 2025 Student Finance Manager | Demo Hackathon Project
+</footer>
+
+<script>
+let expenses=[],budget=0,goal={name:"",target:0};
+
+function addExpense(){
+  let d=document.getElementById("desc").value;
+  let a=parseFloat(document.getElementById("amt").value);
+  if(!d||!a)return;
+  let cat="Other";
+  if(d.toLowerCase().includes("food"))cat="Food";
+  if(d.toLowerCase().includes("book"))cat="Books";
+  if(d.toLowerCase().includes("travel"))cat="Travel";
+  expenses.push({desc:d,amt:a,cat});
+  document.getElementById("desc").value="";
+  document.getElementById("amt").value="";
+  render();
+}
+
+function setBudget(){
+  budget=parseFloat(document.getElementById("budget").value)||0;
+  document.getElementById("budgetInfo").innerText="Budget set: ₹"+budget;
+  checkAlerts();
+}
+
+function setGoal(){
+  goal.name=document.getElementById("goalName").value;
+  goal.target=parseFloat(document.getElementById("goalAmt").value)||0;
+  document.getElementById("goalInfo").innerText="Goal: "+goal.name+" (₹"+goal.target+")";
+  updateGoal();
+}
+
+function render(){
+  let list=document.getElementById("list");
+  list.innerHTML="";
+  let total=0;
+  expenses.forEach(e=>{
+    total+=e.amt;
+    list.innerHTML+=`<div class="expense"><span>${e.desc} (${e.cat})</span><span>₹${e.amt}</span></div>`;
+  });
+  document.getElementById("total").innerText=total;
+  checkAlerts();
+  updateGoal();
+}
+
+function checkAlerts(){
+  let total=expenses.reduce((s,e)=>s+e.amt,0);
+  let alerts=document.getElementById("alerts");
+  alerts.innerHTML="";
+  if(budget>0 && total>budget){
+    alerts.innerHTML=`<div class="alert">⚠️ You exceeded your budget!</div>`;
+  } else if(total>0.8*budget && total<budget){
+    alerts.innerHTML=`<div class="alert">⚠️ You're close to your budget limit!</div>`;
+  }
+}
+
+function updateGoal(){
+  let total=expenses.reduce((s,e)=>s+e.amt,0);
+  if(goal.target>0){
+    let saved=Math.max(goal.target-total,0);
+    let progress=Math.min((saved/goal.target)*100,100);
+    document.getElementById("goalBar").style.width=progress+"%";
+  }
+}
+</script>
+</body>
+</html>
